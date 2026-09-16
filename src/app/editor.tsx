@@ -1242,7 +1242,7 @@ export function Editor({
       context.registerTool({
         name: toolNames[0]!,
         description:
-          "Read the current unsaved Design Studio document and saved revision.",
+          "Read the current unsaved Sparke document and saved revision.",
         inputSchema: { type: "object", properties: {} },
         execute: async () =>
           result({

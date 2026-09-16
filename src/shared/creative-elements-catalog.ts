@@ -1,4 +1,4 @@
-/** Original Design Studio artwork, distributed under the repository MIT license.
+/** Original Sparke artwork, distributed under the repository MIT license.
  * No platform emoji fonts, external CDN, or third-party artwork is used. */
 export const ELEMENT_ARTWORK_LICENSE = 'Original artwork © Design Studio AI contributors; MIT (repository LICENSE)';
 export type LibraryElement = { id: string; name: string; keywords: string[]; kind: 'sticker' | 'emoji'; unicode?: string; recolorable: boolean; body: string };

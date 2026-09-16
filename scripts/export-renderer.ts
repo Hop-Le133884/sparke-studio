@@ -88,7 +88,7 @@ async function pptx(input: DesignDocument) {
     if (usesDom(page) || page.scene || page.nodes.some(n => n.scene)) {
       const canvas = await captureExportPage(doc, pageIndex);
       slide.addImage({ x: 0, y: 0, w: first.width / 96, h: first.height / 96, data: canvas.toDataURL('image/png') });
-      slide.addNotes(page.notes ?? `Design Studio AI: ${page.name}. Structured components rendered as an image.`); continue;
+      slide.addNotes(page.notes ?? `Sparke: ${page.name}. Structured components rendered as an image.`); continue;
     }
     const sx = first.width / page.width / 96, sy = first.height / page.height / 96;
     for (const node of page.nodes) {
@@ -105,7 +105,7 @@ async function pptx(input: DesignDocument) {
         slide.addImage({ ...base, data: canvas.toDataURL('image/png') });
       }
     }
-    slide.addNotes(`Design Studio AI: ${page.name}. Text and primitive shapes remain editable.`);
+    slide.addNotes(`Sparke: ${page.name}. Text and primitive shapes remain editable.`);
   }
   return await deck.write({ outputType: 'base64' });
 }

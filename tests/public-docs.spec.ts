@@ -40,7 +40,7 @@ test('public HTML and agent references have real content, correct types, and pub
     expect(graph.find((node: any) => node['@id'] === `${canonical}#page`)?.url, path).toBe(canonical);
     const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
     expect(title, path).toBeTruthy();
-    expect(title, path).toMatch(/ · Design Studio AI$/);
+    expect(title, path).toMatch(/ · Sparke$/);
     titles.add(title!);
   }
   expect(titles.size).toBe(publicPaths.length);
@@ -100,7 +100,7 @@ test('public HTML and agent references have real content, correct types, and pub
   const llms = await request.get('/llms.txt');
   expect(llms.headers()['content-type']).toContain('text/plain');
   const llmsText = await llms.text();
-  expect(llmsText).toMatch(/^# Design Studio AI\s+>/);
+  expect(llmsText).toMatch(/^# Sparke\s+>/);
   expect(llmsText.lastIndexOf('## Optional')).toBeGreaterThan(llmsText.indexOf('## Reference'));
   const full = await (await request.get('/llms-full.txt')).text();
   expect(full).toContain('approve_design_brief');

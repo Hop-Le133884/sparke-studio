@@ -39,7 +39,7 @@ export async function handleMcp(c: Context<Env>, app: Hono<Env>) {
       {
         error: {
           code: "unauthorized",
-          message: "Use a Design Studio API key or OAuth access token.",
+          message: "Use a Sparke API key or OAuth access token.",
         },
       },
       401,

@@ -45,7 +45,7 @@ export class Client {
   constructor(options: ClientOptions) {
     let base: URL;
     try { base = new URL(options.url ?? process.env.DESIGN_STUDIO_URL ?? 'https://studio.agentkit.best'); }
-    catch { throw new CliError('invalid_url', 'Design Studio URL must be a valid HTTP(S) origin.'); }
+    catch { throw new CliError('invalid_url', 'Sparke URL must be a valid HTTP(S) origin.'); }
     if (base.username || base.password || base.search || base.hash || base.pathname !== '/' ||
         (base.protocol !== 'https:' && !(base.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(base.hostname)))) {
       throw new CliError('invalid_url', 'Use an HTTPS origin, or HTTP localhost for development, without credentials or a path.');

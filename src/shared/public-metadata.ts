@@ -1,4 +1,4 @@
-const siteName = 'Design Studio AI';
+const siteName = 'Sparke';
 const escape = (value: string) => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 
 export interface PublicMetadata {
@@ -18,7 +18,7 @@ export function publicMetadata({ origin, path, title, description, type = 'WebPa
   const absolute = (path: string) => new URL(path, origin).href;
   const url = absolute(path);
   const imageUrl = absolute(image || '/social-card.png');
-  const alt = imageAlt || 'Design Studio AI — a design workspace for people and agents.';
+  const alt = imageAlt || 'Sparke — a design workspace for people and agents.';
   const meta = (key: string, value: string, property = false) => `<meta ${property ? 'property' : 'name'}="${key}" content="${escape(value)}">`;
   const article = type === 'Article' || type === 'TechArticle';
   const graph: Record<string, unknown>[] = [

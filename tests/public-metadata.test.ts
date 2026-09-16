@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { publicMetadata, stripPublicMetadata } from '../src/shared/public-metadata';
 
-const defaults = { origin: 'https://self-hosted.example', path: '/', title: 'Design Studio AI', description: 'A workspace for people and agents.' };
+const defaults = { origin: 'https://self-hosted.example', path: '/', title: 'Sparke', description: 'A workspace for people and agents.' };
 const schema = (html: string) => JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)![1]);
 
 test('homepage metadata uses the deployment origin and describes the real application', () => {

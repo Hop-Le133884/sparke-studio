@@ -7,19 +7,51 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { X, LoaderCircle, Sparkles } from "lucide-react";
+import { X, LoaderCircle } from "lucide-react";
+
+/**
+ * The Sparke mark: two layered rounded squares, navy behind and an orange
+ * gradient in front, separated by a knockout that takes the surface colour
+ * it sits on (`--brand-knockout`). Built from primitive rects per the design
+ * system; do not redraw it freehand.
+ */
+export function SparkeMark({ size = 32 }: { size?: number }) {
+  const gradientId = useId();
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FF8A3D" />
+          <stop offset="1" stopColor="#F05A22" />
+        </linearGradient>
+      </defs>
+      <rect x="8" y="8" width="34" height="34" rx="9" fill="#374EA2" />
+      <rect
+        x="19"
+        y="19"
+        width="40"
+        height="40"
+        rx="11"
+        style={{ fill: "var(--brand-knockout, #ffffff)" }}
+      />
+      <rect x="22" y="22" width="34" height="34" rx="9" fill={`url(#${gradientId})`} />
+    </svg>
+  );
+}
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <span className="brand">
       <span className="brand-symbol">
-        <Sparkles size={19} strokeWidth={1.7} />
+        <SparkeMark />
       </span>
-      {!compact && (
-        <span>
-          Design Studio <span className="brand-ai">AI</span>
-        </span>
-      )}
+      {!compact && <span className="brand-name">Sparke</span>}
     </span>
   );
 }

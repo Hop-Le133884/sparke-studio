@@ -117,7 +117,7 @@ oauthRoutes.on(["GET", "POST"], "/oauth/authorize", async (c) => {
   const user = c.get("user");
   if (!user) {
     return c.html(
-      `<!doctype html><html><head><meta charset="utf-8"><title>Sign in to connect</title></head><body><h1>Sign in to Design Studio AI</h1><p>Sign in in another tab, then return and reload this consent page.</p><a href="/" target="_blank" rel="noopener">Open Design Studio AI</a></body></html>`,
+      `<!doctype html><html><head><meta charset="utf-8"><title>Sign in to connect</title></head><body><h1>Sign in to Sparke</h1><p>Sign in in another tab, then return and reload this consent page.</p><a href="/" target="_blank" rel="noopener">Open Sparke</a></body></html>`,
       401,
     );
   }

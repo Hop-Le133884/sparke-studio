@@ -28,7 +28,7 @@ communityPages.get('/community/*',communityPage);
 communityPages.get('/community',communityPage);
 async function communityPage(c:import('hono').Context<Env>) {
   const path=c.req.path,base=origin(c),query=Object.fromEntries(new URL(c.req.url).searchParams);
-  let title='Community — Design Studio AI',description='Discover, download and remix designs shared by the community.',content='',status:200|404=200;
+  let title='Community — Sparke',description='Discover, download and remix designs shared by the community.',content='',status:200|404=200;
   const privatePage=['/community/saved','/community/publishing','/community/impact','/community/moderation'].includes(path);
   let indexable=!privatePage&&!Object.keys(query).length,cover:string|undefined;
   try{

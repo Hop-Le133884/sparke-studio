@@ -1,11 +1,11 @@
 ---
 name: design-studio-ai
-description: Create, inspect, refine, export, and publish structured web designs, slides, reports, wireframes, 3D scenes, and timeline projects in Design Studio AI through its CLI or authenticated MCP tools.
+description: Create, inspect, refine, export, and publish structured web designs, slides, reports, wireframes, 3D scenes, and timeline projects in Sparke through its CLI or authenticated MCP tools.
 ---
 
-# Design Studio AI
+# Sparke
 
-Use Design Studio's existing document, templates, and node operations to produce editable designs. The hosted workspace is `https://studio.agentkit.best`. Use the user's configured server when self-hosting.
+Use Sparke's existing document, templates, and node operations to produce editable designs. The hosted workspace is `https://studio.agentkit.best`. Use the user's configured server when self-hosting.
 
 ## Establish the brief
 

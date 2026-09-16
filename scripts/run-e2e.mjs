@@ -50,7 +50,7 @@ const testProviderOrigins = 'https://browser-provider.example';
 const env = { ...process.env, PORT: String(port), APP_URL: origin, HOST: '127.0.0.1', DATA_DIR: directory, ALLOW_REGISTRATION: 'true', COMMUNITY_ENABLED:'true', COMMUNITY_ADMIN_IDS:'', COMMUNITY_ADMIN_EMAILS:'community-operator@studio-test.invalid', ENCRYPTION_KEY: randomBytes(32).toString('base64'), E2E_BASE_URL: origin };
 const server = spawn(process.execPath, ['--import', 'tsx', 'server/node.ts'], { env: { ...env, PROVIDER_ALLOWED_ORIGINS: testProviderOrigins }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
 let listening = false, startupOutput = '';
-server.stdout.on('data', data => { startupOutput += data.toString(); listening = startupOutput.includes(`Design Studio AI listening on ${origin}`); process.stdout.write(data); });
+server.stdout.on('data', data => { startupOutput += data.toString(); listening = startupOutput.includes(`Sparke listening on ${origin}`); process.stdout.write(data); });
 server.stderr.on('data', data => process.stderr.write(data));
 console.log(`E2E server PID ${server.pid}, port ${port}, temporary database`);
 let exitCode = 1, runner;

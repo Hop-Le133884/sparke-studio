@@ -1,30 +1,74 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Libre+Caslon+Display&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 
+/*
+ * Sparke design system tokens (September 2026).
+ * Studio-facing names on the left keep the existing component rules working;
+ * the Sparke token each value comes from is noted on the right.
+ */
 :root {
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--ui);
   color: var(--ink);
   background: var(--canvas);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --canvas: oklch(97% 0.006 85);
-  --paper: oklch(99% 0.003 85);
-  --surface: oklch(94.8% 0.008 85);
-  --surface-dark: oklch(91.5% 0.009 85);
-  --line: oklch(88.5% 0.01 85);
-  --ink: oklch(25% 0.012 60);
-  --muted: oklch(49% 0.012 60);
-  --faint: oklch(60% 0.012 60);
-  --accent: oklch(61.2% 0.13 39);
-  --accent-hover: oklch(55% 0.13 39);
-  --accent-wash: oklch(94% 0.029 49);
-  --accent-ink: oklch(44% 0.104 35);
-  --selection: oklch(61% 0.16 259);
-  --danger: oklch(48% 0.16 25);
-  --success: oklch(42% 0.07 152);
-  --danger-wash: oklch(94% 0.022 30);
+  font-variant-numeric: tabular-nums;
+  /* Surfaces: cream working surfaces float on a cool-grey canvas; cards are white. */
+  --canvas: #EDEEF1; /* --surface-app */
+  --paper: #FFFFFF; /* --surface-card */
+  --surface: #FAF6EE; /* --cream-100 */
+  --surface-dark: #EFE7D8; /* --cream-border-strong: active rail fill */
+  --line: #DCDFE4; /* --border: hairline on white */
+  --line-cream: #EAE1D3; /* --cream-border: hairline on cream */
+  --line-strong: #CBD0D8; /* --border-strong: outline buttons */
+  /* Ink ramp */
+  --ink: #14181F; /* --ink-900 */
+  --ink-800: #2A303B;
+  --muted: #5B6472; /* --ink-600 */
+  --faint: #96A0AE; /* --ink-400 */
+  --warm: #9A8C79; /* --warm-500: mono meta, the only warm text */
+  /* Brand */
+  --accent: #F05A22; /* --forge-500 */
+  --accent-light: #FF8A3D; /* --forge-400 */
+  --accent-hover: color-mix(in srgb, var(--accent) 80%, var(--accent-ink));
+  --accent-wash: #FCEDE6; /* --forge-tint-bg */
+  --accent-wash-line: #F7D9CC;
+  --accent-ink: #B4380F; /* --forge-700 */
+  --navy: #374EA2; /* --navy-500 */
+  --navy-ink: #2E3F82; /* --navy-700 */
+  --navy-wash: #EEF1FA; /* --navy-tint-bg */
+  --navy-wash-line: #D8DFF3;
+  --selection: var(--navy);
+  /* Semantic */
+  --danger: #C0392B; /* --neg-600 */
+  --danger-fill: #D64541; /* --neg-500 */
+  --danger-wash: #FBE7E6;
+  --danger-wash-line: #F0C9C7;
+  --success: #0B6E44; /* --pos-700 */
+  --success-dot: #03CA77; /* --pos-400 */
+  --success-wash: #E6F6EE;
+  --warn: #B98600; /* --warn-600 */
+  --warn-dot: #E0A800; /* --warn-500 */
+  --warn-wash: #FBF1D8;
+  --warn-wash-line: #F0DFB0;
+  --info: #1D89B4; /* --info-600 */
+  --info-wash: #E9F7FB;
+  /* Depth */
+  --focus-ring: 0 0 0 3px rgba(55, 78, 162, 0.14);
+  --shadow-card: 0 1px 2px rgba(20, 24, 31, 0.05);
+  --shadow-raised:
+    0 1px 2px rgba(20, 24, 31, 0.05),
+    0 16px 34px -24px rgba(20, 24, 31, 0.28);
+  --shadow-page:
+    0 2px 8px rgba(20, 24, 31, 0.1),
+    0 26px 50px -30px rgba(20, 24, 31, 0.4);
+  --shadow-brand: 0 2px 8px -2px rgba(240, 90, 34, 0.6);
   color-scheme: light;
-  --display: "Libre Caslon Display", Georgia, serif;
+  /* Type: Manrope for headings, UI and numerals; Source Sans 3 for prose; Plex Mono for meta. */
+  --ui: "Manrope", system-ui, sans-serif;
+  --display: "Manrope", system-ui, sans-serif;
+  --body: "Source Sans 3", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
   --s1: 4px;
   --s2: 8px;
   --s3: 12px;
@@ -34,32 +78,57 @@
   --s12: 48px;
   --s16: 64px;
   --s24: 96px;
-  --r-small: 6px;
-  --r: 12px;
-  --r-large: 16px;
+  /* Radius ladder: one radius per role. */
+  --r-badge: 5px;
+  --r-small: 8px; /* button, field */
+  --r: 12px; /* card */
+  --r-large: 14px; /* frame, overlay */
+  --r-hero: 18px;
   --ease: cubic-bezier(0.25, 1, 0.5, 1);
   --z-sticky: 10;
   --z-modal: 30;
   --z-toast: 50;
   font-size: 14px;
 }
+/* Dark ground: only base tokens change; orange does not. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas: oklch(21% 0.009 65);
-  --paper: oklch(24% 0.009 65);
-  --surface: oklch(27% 0.01 65);
-  --surface-dark: oklch(32% 0.011 65);
-  --line: oklch(39% 0.01 65);
-  --ink: oklch(93% 0.007 80);
-  --muted: oklch(75% 0.01 80);
-  --faint: oklch(66% 0.009 80);
-  --accent: oklch(73% 0.12 42);
-  --accent-hover: oklch(78% 0.12 42);
-  --accent-wash: oklch(30% 0.035 42);
-  --accent-ink: oklch(80% 0.105 42);
-  --danger: oklch(77% 0.13 25);
-  --danger-wash: oklch(28% 0.04 25);
-  --success: oklch(77% 0.1 152);
+  --canvas: #0B111C;
+  --paper: #0E1524; /* backdrop */
+  --surface: #161F33; /* tiles */
+  --surface-dark: #1E2A3F;
+  --line: #1E2A3F; /* hairlines */
+  --line-cream: #1E2A3F;
+  --line-strong: rgba(196, 208, 224, 0.22);
+  --ink: #C4D0E0; /* body text */
+  --ink-800: #C4D0E0;
+  --muted: #7C8DA6;
+  --faint: #5E7086; /* mono labels */
+  --warm: #5E7086;
+  --accent-hover: var(--accent-light);
+  --accent-wash: rgba(240, 90, 34, 0.14);
+  --accent-wash-line: rgba(240, 90, 34, 0.32);
+  --accent-ink: var(--accent-light);
+  --navy-ink: #C4D0E0;
+  --navy-wash: rgba(55, 78, 162, 0.26);
+  --navy-wash-line: rgba(55, 78, 162, 0.5);
+  --danger: var(--danger-fill);
+  --danger-wash: rgba(214, 69, 65, 0.16);
+  --danger-wash-line: rgba(214, 69, 65, 0.4);
+  --success: var(--success-dot);
+  --success-wash: rgba(3, 202, 119, 0.14);
+  --warn: var(--warn-dot);
+  --warn-wash: rgba(224, 168, 0, 0.14);
+  --warn-wash-line: rgba(224, 168, 0, 0.35);
+  --info-wash: rgba(29, 137, 180, 0.16);
+  --focus-ring: 0 0 0 3px rgba(55, 78, 162, 0.35);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-raised:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 16px 34px -24px rgba(0, 0, 0, 0.7);
+  --shadow-page:
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    0 26px 50px -30px rgba(0, 0, 0, 0.8);
 }
 * {
   box-sizing: border-box;
@@ -3367,3 +3436,242 @@ details summary {
 .scene-authoring-panel button { margin: 4px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; }
 .scene-authoring-panel input:not([type=checkbox]):not([type=color]), .scene-authoring-panel select, .scene-authoring-panel textarea { max-width: 100%; width: 100%; }
 .scene-source-list { max-height: 150px; overflow: auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Sparke design system: component rules layered over the studio styles.
+   Tokens live at the top of this file; these rules apply the system's
+   type, radius, depth and surface conventions to existing components.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Focus: a 1px navy border plus a soft navy ring, never an orange outline. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 1px solid var(--navy);
+  outline-offset: 0;
+  box-shadow: var(--focus-ring);
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  border-color: var(--navy);
+}
+button:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+button:disabled {
+  opacity: 0.5;
+}
+
+/* Prose reads in Source Sans 3; UI chrome and numerals stay in Manrope. */
+p,
+.small-copy,
+.quiet-note,
+.modal-description,
+.field small {
+  font-family: var(--body);
+}
+input,
+textarea,
+select {
+  font-family: var(--body);
+  border-radius: var(--r-small);
+}
+
+/* Headings: Manrope 800; tracking tightens as size grows. */
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.01em;
+}
+.creation-section h1,
+.systems-section h1,
+.fatal-error h1,
+.studio-greeting h2 {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.creation-section h1 em {
+  font-style: normal;
+  font-weight: 800;
+  color: var(--accent);
+}
+.section-title h2,
+.modal-head h2,
+.settings-content h3,
+.settings-content h4,
+.welcome-projects h3,
+.project-detail strong {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Eyebrows and metadata: mono, uppercase, wide tracking, warm on cream. */
+.intro-label,
+.field > span,
+.inspector-body h3,
+.chat-author,
+.project-heading span {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warm);
+}
+.chat-author svg {
+  color: var(--accent);
+}
+
+/* The orange keyline tops the hero and the studio greeting. */
+.creation-section::before,
+.studio-greeting::before {
+  content: "";
+  display: block;
+  height: 3px;
+  width: 42px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+.creation-section::before {
+  margin-inline: auto;
+}
+
+/* Buttons: Manrope 700, line-height 1, one radius, brand shadow on primary. */
+.button {
+  font-weight: 700;
+  line-height: 1;
+  border-radius: var(--r-small);
+  border-color: var(--line-strong);
+}
+.button:hover:not(:disabled) {
+  transform: none;
+  background: var(--surface);
+}
+.button.primary {
+  border-color: transparent;
+  box-shadow: var(--shadow-brand);
+}
+.button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: transparent;
+}
+.button.danger {
+  background: var(--paper);
+  color: var(--danger-fill);
+  border-color: var(--danger-wash-line);
+}
+.button.danger:hover:not(:disabled) {
+  background: var(--danger-wash);
+}
+.text-button {
+  font-weight: 600;
+}
+.send-button {
+  box-shadow: var(--shadow-brand);
+}
+.kind-picker button.selected {
+  font-weight: 700;
+}
+
+/* Surfaces: white header and cards, cream rails and panels, cool canvas. */
+.main-header {
+  background: var(--paper);
+}
+.home-atmosphere {
+  display: none;
+}
+.composer {
+  border-radius: 16px;
+  box-shadow: var(--shadow-raised);
+}
+.composer:focus-within {
+  border-color: var(--navy);
+  box-shadow: var(--shadow-raised), var(--focus-ring);
+}
+.welcome-projects,
+.project-thumbnail,
+.template-preview {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+.editor-header,
+.left-panel,
+.inspector {
+  background: var(--surface);
+  border-color: var(--line-cream);
+}
+.panel-tabs,
+.inspector-body section {
+  border-bottom-color: var(--line-cream);
+}
+.chat-suggestions button {
+  background: var(--paper);
+  border-color: var(--line-cream);
+  border-radius: var(--r-small);
+}
+.chat-compose {
+  border-color: var(--line-cream);
+  box-shadow: var(--shadow-card);
+}
+.chat-compose:focus-within {
+  border-color: var(--navy);
+  box-shadow: var(--focus-ring);
+}
+.chat-message.user {
+  background: var(--navy-wash);
+  border: 1px solid var(--navy-wash-line);
+  border-radius: var(--r);
+  margin-left: 12%;
+}
+.modal {
+  background: var(--paper);
+  box-shadow: var(--shadow-page);
+}
+.toast {
+  border-radius: var(--r-small);
+  box-shadow: var(--shadow-raised);
+}
+.avatar,
+.mini-avatar {
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--r-small);
+  font-weight: 800;
+}
+.mini-avatar {
+  border-radius: 6px;
+}
+
+/* Brand: the two-square mark with a knockout in the surface colour it sits on. */
+.brand {
+  gap: var(--s2);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+.brand-name {
+  font-size: 1.45rem;
+}
+.brand-symbol {
+  --brand-knockout: var(--paper);
+  width: 40px;
+  height: 40px;
+  background: none;
+  color: inherit;
+  border-radius: 0;
+}
+.brand-symbol svg {
+  width: 100%;
+  height: 100%;
+}
+.editor-heading .brand-symbol,
+.studio-greeting .brand-symbol {
+  --brand-knockout: var(--surface);
+  width: 36px;
+  height: 36px;
+}

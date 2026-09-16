@@ -6,9 +6,9 @@ import { CliError, output } from './client';
 import { AGENTS, AGENT_IDS, mcpUrl, mergeMcpConfig, serverEntry } from './mcp-config';
 
 export function registerMcpCommands(program: Command) {
-  const mcp = program.command('mcp').description('Connect coding agents to the Design Studio network MCP server');
+  const mcp = program.command('mcp').description('Connect coding agents to the Sparke network MCP server');
   mcp.command('install <agent>')
-    .description(`Generate the Design Studio MCP server config for an agent (${AGENT_IDS.join(', ')}). Prints by default; --write persists it (Claude Code only).`)
+    .description(`Generate the Sparke MCP server config for an agent (${AGENT_IDS.join(', ')}). Prints by default; --write persists it (Claude Code only).`)
     .option('--url <origin>', 'Studio server origin; defaults to DESIGN_STUDIO_URL or https://studio.agentkit.best')
     .option('--api-key <token>', 'API token; defaults to DESIGN_STUDIO_API_KEY')
     .option('--name <serverName>', 'MCP server entry name', 'design-studio')

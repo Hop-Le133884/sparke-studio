@@ -78,7 +78,7 @@ const server = serve(
   },
   () =>
     console.log(
-      `Design Studio AI listening on http://${process.env.HOST ?? "127.0.0.1"}:${port}`,
+      `Sparke listening on http://${process.env.HOST ?? "127.0.0.1"}:${port}`,
     ),
 );
 let operationRunning=false, communityTurn=false;

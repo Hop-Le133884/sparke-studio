@@ -346,7 +346,7 @@ app.notFound((c) => {
     );
   if (c.env.ASSETS) return c.env.ASSETS.fetch(c.req.raw);
   return c.text(
-    "Design Studio AI frontend is not built. Run npm run build.",
+    "Sparke frontend is not built. Run npm run build.",
     404,
   );
 });

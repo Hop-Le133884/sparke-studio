@@ -164,7 +164,7 @@ export async function exportDesign(
     });
     pptx.layout = "STUDIO";
     pptx.title = doc.name;
-    pptx.author = "Design Studio AI";
+    pptx.author = "Sparke";
     for (let index = 0; index < doc.pages.length; index++) {
       const p = doc.pages[index]!,
         slide = pptx.addSlide();
@@ -178,7 +178,7 @@ export async function exportDesign(
         h: page.height / 96,
       });
       slide.addNotes(
-        `Created in Design Studio AI. Page: ${p.name}. The slide is a faithful rendered image; edit the source document for changes.`,
+        `Created in Sparke. Page: ${p.name}. The slide is a faithful rendered image; edit the source document for changes.`,
       );
     }
     await pptx.writeFile({ fileName: `${name}.pptx` });
