@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { buildMediaRequest, mediaInputSchema, upstream } from '../server/providers';
+import { buildMediaRequest, mediaInputSchema, upstream, limitedBytes, textCompletionTimeout, DEFAULT_TEXT_TIMEOUT_MS } from '../server/providers';
 import { allowedProviderBase, providerHeaders } from '../server/provider-connections';
 import { buildTextRequest } from '../server/text-provider-request';
 import { buildImageRequest, decodeImageResult, leonardoJob } from '../server/image-providers';
@@ -98,4 +98,30 @@ test('real HTTP redirects are rejected without forwarding authentication', async
   const address = server.address() as { port: number };
   await assert.rejects(upstream(`http://127.0.0.1:${address.port}/redirect`, { headers: { Authorization: 'Bearer local-test' } }), errorCode('provider_error'));
   assert.equal(redirected, false);
+});
+
+test('slow providers surface as provider_timeout during connection and while streaming the body', async t => {
+  const timers: NodeJS.Timeout[] = [];
+  const server = createServer((request, response) => {
+    if (request.url === '/slow-headers') { timers.push(setTimeout(() => { response.end('{}'); }, 2000)); return; }
+    // Headers arrive at once; the body stalls like a reasoning model still writing its answer.
+    response.writeHead(200, { 'Content-Type': 'application/json' }); response.write('{"choices":[');
+    timers.push(setTimeout(() => { response.end(']}'); }, 2000));
+  });
+  server.listen(0, '127.0.0.1'); await once(server, 'listening');
+  t.after(() => new Promise<void>(resolve => { for (const timer of timers) clearTimeout(timer); server.closeAllConnections(); server.close(() => resolve()); }));
+  const origin = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+  await assert.rejects(upstream(`${origin}/slow-headers`, {}, 150), errorCode('provider_timeout'));
+  const streaming = await upstream(`${origin}/slow-body`, {}, 300);
+  await assert.rejects(limitedBytes(streaming), errorCode('provider_timeout'));
+});
+
+test('text completion timeout is operator-configurable within safe bounds', () => {
+  assert.equal(textCompletionTimeout(undefined), DEFAULT_TEXT_TIMEOUT_MS);
+  assert.equal(textCompletionTimeout({}), DEFAULT_TEXT_TIMEOUT_MS);
+  assert.equal(textCompletionTimeout({ PROVIDER_TEXT_TIMEOUT_MS: 'soon' }), DEFAULT_TEXT_TIMEOUT_MS);
+  assert.equal(textCompletionTimeout({ PROVIDER_TEXT_TIMEOUT_MS: '-5' }), DEFAULT_TEXT_TIMEOUT_MS);
+  assert.equal(textCompletionTimeout({ PROVIDER_TEXT_TIMEOUT_MS: '900000' }), 900000);
+  assert.equal(textCompletionTimeout({ PROVIDER_TEXT_TIMEOUT_MS: '1000' }), 30000);
+  assert.equal(textCompletionTimeout({ PROVIDER_TEXT_TIMEOUT_MS: '99999999' }), 1800000);
 });

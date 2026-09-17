@@ -35,6 +35,8 @@ export interface Bindings {
   ENCRYPTION_KEY?: string;
   APP_URL?: string;
   ALLOW_REGISTRATION?: string;
+  /** Milliseconds to wait for a text-completion provider; see textCompletionTimeout. */
+  PROVIDER_TEXT_TIMEOUT_MS?: string;
   PROVIDER_ALLOWED_ORIGINS?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_FONTS_API_KEY?: string;

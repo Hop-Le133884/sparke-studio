@@ -11,6 +11,7 @@ import type { Env } from "./types";
 import { fail, id, now, owner, rateLimit } from "./security";
 import { projectRow, storeAsset, validateAssets } from "./projects";
 import { documentSchema } from "../src/shared/schema";
+import { repairGeneratedDocument } from "../src/shared/generation-repair";
 import type { DesignBrief } from '../src/shared/brief';
 import { providerConfig, providerHeaders, providerRoutes } from './provider-connections';
 import { providerCatalog as defaults, textProviderSchema, isCustomProvider } from '../src/shared/providers';
@@ -24,7 +25,16 @@ export async function limitedBytes(
   let length = 0;
   const chunks: Uint8Array[] = [];
   while (true) {
-    const chunk = await reader.read();
+    let chunk: ReadableStreamReadResult<Uint8Array>;
+    try {
+      chunk = await reader.read();
+    } catch (error) {
+      // The request's AbortSignal also governs the body stream, so a slow
+      // model surfaces here rather than at fetch(). Report it as a provider
+      // timeout instead of an unexpected server error.
+      if (isTimeout(error)) fail(502, "provider_timeout", "Provider stopped responding before the response finished. Try a faster model or raise PROVIDER_TEXT_TIMEOUT_MS.");
+      throw error;
+    }
     if (chunk.done) break;
     length += chunk.value.byteLength;
     if (length > limit) {
@@ -45,6 +55,21 @@ export async function limitedBytes(
   }
   return bytes.buffer;
 }
+const isTimeout = (error: unknown) =>
+  error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
+export const DEFAULT_TEXT_TIMEOUT_MS = 600000;
+const MIN_TEXT_TIMEOUT_MS = 30000, MAX_TEXT_TIMEOUT_MS = 1800000;
+/**
+ * Text completions may legitimately take minutes: reasoning models writing a
+ * full design document routinely exceed the two-minute default used for other
+ * provider calls. Operators tune this with PROVIDER_TEXT_TIMEOUT_MS; invalid or
+ * out-of-range values fall back to the bounded default.
+ */
+export function textCompletionTimeout(env: { PROVIDER_TEXT_TIMEOUT_MS?: string } | undefined): number {
+  const configured = Number(env?.PROVIDER_TEXT_TIMEOUT_MS);
+  if (!Number.isFinite(configured) || configured <= 0) return DEFAULT_TEXT_TIMEOUT_MS;
+  return Math.min(MAX_TEXT_TIMEOUT_MS, Math.max(MIN_TEXT_TIMEOUT_MS, Math.round(configured)));
+}
 export async function upstream(
   url: string,
   init: RequestInit,
@@ -57,7 +82,13 @@ export async function upstream(
       redirect: "manual",
       signal: AbortSignal.timeout(timeout),
     });
-  } catch {
+  } catch (error) {
+    if (isTimeout(error))
+      return fail(
+        502,
+        "provider_timeout",
+        `Provider did not respond within ${Math.round(timeout / 1000)} seconds. Try a faster model or raise PROVIDER_TEXT_TIMEOUT_MS.`,
+      );
     return fail(
       502,
       "provider_unavailable",
@@ -93,7 +124,7 @@ export async function completeText(c: Context<Env>, body: {
   const model = body.model ?? config.model;
   span.set({ model });
   const request = buildTextRequest(config, { ...body, model });
-  const result = await jsonResponse(await upstream(request.url, request.init));
+  const result = await jsonResponse(await upstream(request.url, request.init, textCompletionTimeout(c.env)));
   const output = config.protocol === 'anthropic' ? result.content?.filter((c: any) => c.type === 'text').map((c: any) => c.text).join('') ?? ''
     : config.protocol === 'gemini' ? result.candidates?.[0]?.content?.parts?.filter((p: any) => !p.thought).map((p: any) => p.text ?? '').join('') ?? ''
     : result.choices?.[0]?.message?.content ?? '';
@@ -113,7 +144,7 @@ generationRoutes.post("/:id/generate", async (c) => {
   const brief = savedBrief ? JSON.parse(savedBrief.brief) as DesignBrief : null;
   if (brief && (brief.status !== 'approved' || !brief.scope || !brief.approvedAt)) fail(409, 'brief_not_approved', 'Review and explicitly approve the project scope before generating.');
   const motion=body.mode==='motion'||(body.mode!=='document'&&!!JSON.parse(row.document).characters?.length);
-  const system = 'You edit canonical DesignDocument v1 or v2 JSON, preserving the input schemaVersion. For v2 preserve all boards, paintings, asset IDs, layer manifests and generation identities unless explicitly instructed. Never fabricate paint pixel hashes or composites; pixel changes require owned PNG tiles. Return only the complete valid document, no prose or markdown. Preserve id and kind and existing useful content unless asked. Nodes have finite pixel x,y,width,height; type frame,group,component,text,image,shape,icon,chart,model3d,video,audio,board,artwork. Prefer structured flex/grid page and container layout for Web/App designs: layout has mode, direction row/column, gap,padding,align,justify,wrap,columns. sizing width/height uses fixed/hug/fill. Explicit absolute containers use local child coordinates; containers with no layout keep legacy page-space coordinates. Components use component:{name,system:antd or shadcn,props:{label,...}}; available names Button,Checkbox,Input,InputNumber,Slider,Image,Avatar,List,Statistics,Chart,Table,Select,Switch,Textarea,Card,Badge,Progress,Tabs,Dialog,Radio. Parent IDs must exist on the same page. Text belongs in text, styles in style. Timeline keyframes support linear,easeIn,easeOut,easeInOut,bounce,spring,step or a cubic bezier tuple. Mesh geometry/UV/materials/bones belong in scene; preserve existing mesh data unless specifically editing it. Never return executable code, scripts, event handlers, or javascript URLs. Preserve schemaVersion, theme, pages, assets and metadata. '
+  const system = 'You edit canonical DesignDocument v1 or v2 JSON, preserving the input schemaVersion. For v2 preserve all boards, paintings, asset IDs, layer manifests and generation identities unless explicitly instructed. Never fabricate paint pixel hashes or composites; pixel changes require owned PNG tiles. Return only the complete valid document, no prose or markdown. Preserve id and kind and existing useful content unless asked. Each page has ONE flat nodes array: every node, including every child of a group or frame, is its own entry in that array and nests only through parentId. A node never contains a children array; nested children are discarded. Children of a parent that has a layout use coordinates local to that parent; children of a parent WITHOUT a layout use page coordinates. Give every group or frame that contains children a layout (mode absolute for hand-placed children, flex or grid for flowing content) and write child x,y relative to that parent. Every node requires id, type, name (a short layer label), and finite pixel x,y,width,height; opacity is 0–1. Types: frame,group,component,text,image,shape,icon,chart,model3d,video,audio,board,artwork. Renderers read these style keys only: fill (background of shapes/frames and the colour of text), stroke, strokeWidth, borderRadius, shape ("ellipse" for circles), fontFamily, fontSize, fontWeight, fontStyle, textAlign, letterSpacing, lineHeight, objectFit; CSS names such as background, color, borderColor and borderWidth are ignored. Colours are hex strings or theme tokens like $accent, $text, $surface, $muted, $border. There is no icon glyph library: an icon node draws as a plain filled shape, so express symbols with text, shapes or components instead. Size text boxes generously for their content so nothing is clipped. Prefer structured flex/grid page and container layout for Web/App designs: layout has mode (absolute|flex|grid), direction (row|column), gap, padding, align (start|center|end|stretch), justify (start|center|end|space-between), wrap (boolean), columns (integer); use exactly these words, never CSS values like flex-start or space-around; gap and padding are each ONE non-negative number of pixels applied uniformly, never an array or a CSS string. sizing width/height uses fixed/hug/fill. Explicit absolute containers use local child coordinates; containers with no layout keep legacy page-space coordinates. Components use component:{name,system:antd or shadcn,props:{label,...}}; available names Button,Checkbox,Input,InputNumber,Slider,Image,Avatar,List,Statistics,Chart,Table,Select,Switch,Textarea,Card,Badge,Progress,Tabs,Dialog,Radio. Parent IDs must exist on the same page. Text belongs in text, styles in style. Image, video, audio and model3d nodes may set src only to an https URL or to an asset path already present in this document (/api/assets/<id>); when no real media exists, omit src entirely so the studio shows its media placeholder. Never invent relative paths, file names or SVG data URLs. Timeline keyframes support linear,easeIn,easeOut,easeInOut,bounce,spring,step or a cubic bezier tuple. Mesh geometry/UV/materials/bones belong in scene; preserve existing mesh data unless specifically editing it. Never return executable code, scripts, event handlers, or javascript URLs. Preserve schemaVersion, theme, pages, assets and metadata. '
     + (brief ? `The user explicitly approved this scope. Fulfill its objective, audience, direction, deliverables, constraints and acceptance criteria: ${JSON.stringify(brief.scope)}. ` : '')
     + 'Current document: ' + row.document;
   const motionContext=motionProposalContext(documentSchema.parse(JSON.parse(row.document)));
@@ -133,15 +164,26 @@ generationRoutes.post("/:id/generate", async (c) => {
       "Provider did not return a valid document. Your project was not changed.",
     );
   }
+  if (!motion) {
+    const repairs = repairGeneratedDocument(draft);
+    if (repairs.length) console.warn(`Repaired ${repairs.length} provider value(s) before validation`, repairs.slice(0, 30).map(repair => `${repair.path}: ${JSON.stringify(repair.from)} -> ${repair.to === undefined ? '(removed)' : repair.to}`));
+  }
   let operations:unknown;
   if(motion){try{operations=parseMotionProposal(documentSchema.parse(JSON.parse(row.document)),draft);draft=mutateDocument(documentSchema.parse(JSON.parse(row.document)),operations);}catch{fail(502,'invalid_generation','Motion operations failed validation. Your project was not changed.');}}
   const parsed = documentSchema.safeParse(draft);
-  if (!parsed.success)
+  if (!parsed.success) {
+    // Zod issue paths and messages name fields and expected types, never node
+    // content or credentials, so they are safe to surface. They tell the person
+    // (or agent) which part of the document the provider got wrong.
+    const issues = parsed.error.issues.map(issue => `${issue.path.join('.') || 'document'}: ${issue.message}`);
+    console.warn(`Generated document failed validation (${issues.length} issues)`, issues.slice(0, 30));
+    const summary = issues.slice(0, 5).join('; ') + (issues.length > 5 ? `; and ${issues.length - 5} more` : '');
     fail(
       502,
       "invalid_generation",
-      "Generated document failed validation. Your project was not changed.",
+      `Generated document failed validation. Your project was not changed. Issues: ${summary}`,
     );
+  }
   if (parsed.data.id !== row.id || parsed.data.kind !== row.kind)
     fail(
       502,
